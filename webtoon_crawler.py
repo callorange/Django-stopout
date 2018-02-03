@@ -20,6 +20,10 @@ def get_url(url, method='get', url_param=''):
 
     Raises:
         ValueError: 인자가 잘못된 경우 발생
+
+    Example:
+        >>> get_url('http://comic.naver.com/webtoon/list.nhn','post',url_param={'titleId':704595})
+        >>> get_url('http://comic.naver.com/webtoon/list.nhn',url_param={'titleId':704595})
     """
     if url.strip() == '':
         raise ValueError('URL IS BLANK')
@@ -54,7 +58,12 @@ class Webtoon:
     """
 
     _webtoon_id = 0
-    _current_page = 0
+    _webtoon_thumbnail = None
+    _webtoon_title = None
+    _webtoon_author = None
+    _webtoon_description = None
+
+    _current_page = 1
 
     def __init__(self, webtoon_id=0):
         """웹툰 정보 생성
@@ -64,16 +73,41 @@ class Webtoon:
         Args:
             webtoon_id (int): 웹툰 아이디 기본값 0
         """
-        if webtoon_id.isnumeric() or webtoon_id < 1:
+        if not(isinstance(webtoon_id, int)) or webtoon_id < 1:
             raise ValueError('웹툰아이디가 올바르지 않습니다.')
         self._webtoon_id = webtoon_id
-        self.info_refresh()
+
+    def __str__(self):
+        to_str = "웹툰 : {} - {} (작가:{})".format(
+            self.webtoon_title,
+            self.webtoon_description,
+            self.webtoon_author
+        )
+        return to_str
 
     def info_refresh(self):
         """웹툰 정보를 네이버 웹툰에서 가져온다"""
+        naver_page = get_url('http://comic.naver.com/webtoon/list.nhn', url_param={'titleId': self._webtoon_id})
 
-        #http://comic.naver.com/webtoon/list.nhn?titleId=704595
+        if naver_page:
+            # BeautifulSoup 파싱
+            soup_page = BeautifulSoup(naver_page, 'lxml')
+            comic_info = soup_page.select_one('.comicinfo')
 
+            if comic_info:
+                comic_thumb = comic_info.select_one('div.thumb img')
+                comic_title = comic_info.select_one('div.detail h2')
+                comic_author = comic_info.select_one('div.detail h2 span')
+                comic_desc = comic_info.select_one('div.detail > p')
+
+                if comic_thumb:
+                    self._webtoon_thumbnail = comic_thumb['src']
+                if comic_title:
+                    self._webtoon_title = comic_title.find(text=True, recursive=False).strip()
+                if comic_author:
+                    self._webtoon_author = comic_author.text.strip()
+                if comic_desc:
+                    self._webtoon_description = comic_desc.text.strip()
 
     @property
     def webtoon_id(self):
@@ -84,19 +118,57 @@ class Webtoon:
         """
         return self._webtoon_id
 
-    @webtoon_id.setter
-    def webtoon_id(self, webtoon_id):
-        """웹툰 아이디를 설정한다.
+    @property
+    def webtoon_thumbnail(self):
+        """웹툰 썸네일 경로 반환
 
-        웹툰 아이디가 새로 지정될 경우 가지고 있던 **기존 정보는 초기화** 됩니다.
-
-        Args:
-            webtoon_id (int): 새로 지정할 웹툰 아이디
-
-        Raises:
-            ValueError: 웹툰 아이디가 0보다 작거나 숫자가 아닐경우
+        Returns:
+            str: 웹툰 썸네일 이미지 경로
         """
-        self._webtoon_id = webtoon_id
+        if self._webtoon_thumbnail:
+            return self._webtoon_thumbnail
+        else:
+            self.info_refresh()
+            return self._webtoon_thumbnail
+
+    @property
+    def webtoon_title(self):
+        """웹툰 제목 반환
+
+        Returns:
+            str: 웹툰 제목
+        """
+        if self._webtoon_title:
+            return self._webtoon_title
+        else:
+            self.info_refresh()
+            return self._webtoon_title
+
+    @property
+    def webtoon_author(self):
+        """웹툰 작가명 반환
+
+        Returns:
+            str: 웹툰 작가명
+        """
+        if self._webtoon_author:
+            return self._webtoon_author
+        else:
+            self.info_refresh()
+            return self._webtoon_author
+
+    @property
+    def webtoon_description(self):
+        """웹툰 설명 반환
+
+        Returns:
+            str: 웹툰 설명
+        """
+        if self._webtoon_description:
+            return self._webtoon_description
+        else:
+            self.info_refresh()
+            return self._webtoon_description
 
 
 class EpisodeData:
@@ -166,6 +238,13 @@ def get_episode_list(webtoon_id, page=1):
 
 
 if __name__ == '__main__':
-    toon = get_episode_list(1111)
-    for episode in toon:
-        print(episode)
+    # toon = get_episode_list(1111)
+    # for episode in toon:
+    #     print(episode)
+    a = Webtoon(704595)
+    print(a.webtoon_id)
+    print(a.webtoon_title)
+    print(a.webtoon_author)
+    print(a.webtoon_thumbnail)
+    print(a.webtoon_description)
+    print(a)
