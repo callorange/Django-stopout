@@ -3,8 +3,8 @@ from django.shortcuts import render
 
 
 def index(request):
-    return HttpResponse('Hello Index')
+    return render(request, 'webtoon/index.html')
 
 
 def episode_list(request, webtoon_id):
-    return HttpResponse('Hello List')
+    return render(request, 'webtoon/episode_list.html')

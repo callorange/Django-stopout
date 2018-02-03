@@ -1,0 +1,57 @@
+{% extends 'base/base.html' %}
+
+{% block 'doc-title' %}
+    {{ block.super }}
+{% endblock %}
+
+{% block 'doc-subject' %}
+    <div class="media">
+        <img class="align-self-center mr-3 img-thumbnail" src="http://thumb.comic.naver.net/webtoon/374974/thumbnail/title_thumbnail_20140829190825_t125x101.jpg" alt="Card image cap">
+        <div class="media-body">
+            <h1 class="mt-0">심심한 마왕</h1>
+            <h6 class="mb-2 text-muted">이현민</h6>
+            평화로운(?) 마계에서 평화롭게(?) 살아가는 심심한 마왕의 심심하지만은 않은 이야기
+        </div>
+    </div>
+{% endblock %}
+
+{% block 'doc-body' %}
+    <div class="table-responsive">
+    <table class="table table-hover mb-0">
+        <thead class="thead-light text-center">
+            <tr>
+                <th scope="col">이미지</th>
+                <th scope="col">제목</th>
+                <th scope="col">별점</th>
+                <th scope="col">등록일</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for i in '1234567890' %}
+            <tr>
+                <td class="text-center"><img class="img-thumbnail" src="http://thumb.comic.naver.net/webtoon/374974/thumbnail/title_thumbnail_20140829190825_t125x101.jpg" alt="Card image cap"></td>
+                <td class="align-middle">평화로운(?) 마계에서 평화롭게(?) <a href=""><i class="fas fa-external-link-alt"></i><span class="sr-only">보러가기</span></a></td>
+                <td class="text-center align-middle">9.99</td>
+                <td class="text-center align-middle">2017.09.11</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+{% endblock %}
+
+{% block 'doc-page' %}
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1">Previous</a>
+            </li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+            </li>
+        </ul>
+    </nav>
+{% endblock %}

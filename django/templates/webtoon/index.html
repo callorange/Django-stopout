@@ -1,0 +1,27 @@
+{% extends 'base/base.html' %}
+
+{% block 'doc-title' %}
+    {{ block.super }}
+{% endblock %}
+
+{% block 'doc-subject' %}
+<h1 class="display-5">웹툰 리스트</h1>
+{% endblock %}
+
+{% block 'doc-body' %}
+<style>
+</style>
+    <div class="card-columns">
+    {% for i in '123456789' %}
+        <div class="card">
+            <img class="card-img-top" src="http://thumb.comic.naver.net/webtoon/374974/thumbnail/title_thumbnail_20140829190825_t125x101.jpg" alt="Card image cap">
+            <div class="card-body">
+                <h5 class="card-title">심심한 마왕</h5>
+                <h6 class="card-subtitle mb-2 text-muted">이현민</h6>
+                <p class="card-text">평화로운(?) 마계에서 평화롭게(?) 살아가는 심심한 마왕의 심심하지만은 않은 이야기</p>
+                <a href="{% url 'webtoon:episode_list' webtoon_id=i %}" class="card-link">에피소드 보기</a>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock %}
