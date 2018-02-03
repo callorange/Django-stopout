@@ -1,3 +1,4 @@
+import requests
 from bs4 import BeautifulSoup
 
 
@@ -6,8 +7,40 @@ __all__ = [
 ]
 
 
-def get_url_text(url):
-    """지정된 url에서 response text를 반환한다."""
+def get_url(url, method='get', url_param=''):
+    """지정된 url에서 response text를 반환한다.
+
+    Args:
+        url (str): 가져올 url. http:// 혹은 https://로 시작하는 주소여야 합니다.
+        method (str): http method. 'get' or 'post'. default 'get'
+        url_param (dict): 지정된 url에 같이 보낼 파라미터.
+
+    Returns:
+        str: url에서 응답한 response text. 오류 발생시 빈 문자열을 반환한다.
+
+    Raises:
+        ValueError: 인자가 잘못된 경우 발생
+    """
+    if url.strip() == '':
+        raise ValueError('URL IS BLANK')
+    if not( method.lower() in ['get', 'post'] ):
+        raise ValueError('method는 get이나 post여야 합니다.')
+    if url_param != '' and not( isinstance(url_param, dict) ):
+        raise ValueError('url_param은 딕셔너리로 지정해주셔야 합니다.')
+
+    # 일부 웹사이트는 http에서 헤더를 검사해서 응답을 안주는 경우가 있다. (ex: melon.com)
+    my_headers = {'user-agent': 'my-app/0.0.1'}
+    response = ''
+    if method.lower() == 'get':
+        response = requests.get(url, params=url_param, headers=my_headers)
+    else:
+        response = requests.post(url, params=url_param, headers=my_headers)
+
+    if response.status_code != 200:
+        return ''
+
+    return response.text
+
 
 class Webtoon:
     """웹툰 정보
