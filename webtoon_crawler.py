@@ -1,6 +1,58 @@
 from bs4 import BeautifulSoup
 
 
+__all__ = [
+    'get_episode_list',
+]
+
+
+class Webtoon:
+    """웹툰 정보
+
+    Attributes:
+        webtoon_id (int): 웹툰 아이디 기본 0
+
+    Raises:
+        ValueError: 웹툰 아이디가 잘 못 지정된 경우 발생
+    """
+
+    _webtoon_id = 0
+    _current_page = 0
+
+    def __init__(self, webtoon_id=0):
+        """웹툰 정보 생성
+
+        Args:
+            webtoon_id (int): 웹툰 아이디 기본값 0
+        """
+        if webtoon_id.isnumeric():
+            raise ValueError('웹툰아이디가 올바르지 않습니다.')
+        self._webtoon_id = webtoon_id
+
+    @property
+    def webtoon_id(self):
+        """웹툰 아이디 반환
+
+        Returns:
+            int: 웹툰 아이디. 지정되지 않았을 경우 0
+        """
+        return self._webtoon_id
+
+    @webtoon_id.setter
+    def webtoon_id(self, webtoon_id):
+        """웹툰 아이디를 설정한다.
+
+        웹툰 아이디가 새로 지정될 경우 가지고 있던 **기존 정보는 초기화** 됩니다.
+
+        Args:
+            webtoon_id (int): 새로 지정할 웹툰 아이디
+
+        Raises:
+            ValueError: 웹툰 아이디가 0보다 작거나 숫자가 아닐경우
+        """
+        self._webtoon_id = webtoon_id
+
+
 class EpisodeData:
     """웹툰의 에피소드 정보"""
 
@@ -14,7 +66,40 @@ class EpisodeData:
             rating (int): 에피소드 평점
             created_date (date): 에피소드 등록일
         """
-        pass
+        self._episode_id = episode_id
+        self._url_thumbnail = url_thumbnail
+        self._title = title
+        self._rating = rating
+        self._created_date = created_date
+
+    def __str__(self):
+        to_str = "{}화 제목:{}. 별점:{}. 등록일:{}".format(
+            self._episode_id,
+            self._title,
+            self._rating,
+            self._created_date,
+        )
+        return to_str
+
+    @property
+    def episode_id(self):
+        return self._episode_id
+
+    @property
+    def url_thumbnail(self):
+        return self._url_thumbnail
+
+    @property
+    def title(self):
+        return self._title
+
+    @property
+    def rating(self):
+        return self._rating
+
+    @property
+    def created_date(self):
+        return self._created_date
 
 
 def get_episode_list(webtoon_id, page=1):
@@ -32,3 +117,9 @@ def get_episode_list(webtoon_id, page=1):
         ValueError: webtoon_id, page가 잘 못 지정되었을 경우
     """
     pass
+
+
+if __name__ == '__main__':
+    toon = get_episode_list(1111)
+    for episode in toon:
+        print(episode)
