@@ -6,6 +6,9 @@ __all__ = [
 ]
 
 
+def get_url_text(url):
+    """지정된 url에서 response text를 반환한다."""
+
 class Webtoon:
     """웹툰 정보
 
@@ -22,12 +25,21 @@ class Webtoon:
     def __init__(self, webtoon_id=0):
         """웹툰 정보 생성
 
+        네이버에서 기본 정보를 가져와서 추가 한다.
+
         Args:
             webtoon_id (int): 웹툰 아이디 기본값 0
         """
-        if webtoon_id.isnumeric():
+        if webtoon_id.isnumeric() or webtoon_id < 1:
             raise ValueError('웹툰아이디가 올바르지 않습니다.')
         self._webtoon_id = webtoon_id
+        self.info_refresh()
+
+    def info_refresh(self):
+        """웹툰 정보를 네이버 웹툰에서 가져온다"""
+
+        #http://comic.naver.com/webtoon/list.nhn?titleId=704595
+
 
     @property
     def webtoon_id(self):
