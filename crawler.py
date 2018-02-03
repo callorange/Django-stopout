@@ -178,7 +178,7 @@ class Webtoon:
                     episode_rating = item_list[2].find('strong').text.strip()
                     episode_created_date = item_list[3].text.strip()
 
-                    e = EpisodeData(episode_id, episode_thumbnail, episode_title, episode_rating, episode_created_date)
+                    e = EpisodeData(self._webtoon_id, episode_id, episode_thumbnail, episode_title, episode_rating, episode_created_date)
                     self._episode_list.append(e)
 
                 self._page_refreshed = True
@@ -202,6 +202,15 @@ class Webtoon:
         else:
             self.page_refresh()
             return self._episode_list
+
+    @property
+    def webtoon_url(self):
+        """웹툰 웹페이지 url을 반환
+
+        Returns:
+            str: 웹툰의 url
+        """
+        return self._webtoon_url + '?titleId=' + str(self.webtoon_id)
 
     @property
     def webtoon_id(self):
@@ -311,20 +320,33 @@ class Webtoon:
             self._current_page = page
             self._page_refreshed = False
 
+    @property
+    def current_page_url(self):
+        """현재 페이지의 웹페이지 url을 반환
+
+        Returns:
+            str: 웹툰의 현재 페이지 url
+        """
+        if self._page_refreshed:
+            self.page_refresh()
+        return self._webtoon_url + '?titleId=' + str(self.webtoon_id) + '&page=' + str(self.current_page)
+
 
 class EpisodeData:
     """웹툰의 에피소드 정보"""
 
-    def __init__(self, episode_id, url_thumbnail, title, rating, created_date):
+    def __init__(self, webtoon_id, episode_id, url_thumbnail, title, rating, created_date):
         """웹툰 에피소드 정보 생성
 
         Args:
+            webtoon_id (int): 웹툰의 아이디
             episode_id (int): 에피소드 아이디
             url_thumbnail (str): 에피소드 썸네일 링크
             title (str): 에피소드 정보
             rating (int): 에피소드 평점
             created_date (date): 에피소드 등록일
         """
+        self._webtoon_id = webtoon_id
         self._episode_id = episode_id
         self._url_thumbnail = url_thumbnail
         self._title = title
@@ -339,6 +361,19 @@ class EpisodeData:
             self._created_date,
         )
         return to_str
+
+    @property
+    def episode_url(self):
+        """해당 에피소드 url 반환
+
+        Returns:
+            str: 해당 에피소드를 볼 수 있는 url주소
+        """
+        return "http://comic.naver.com/webtoon/detail.nhn?titleId=" + str(self._webtoon_id) + "&no=" + str(self.episode_id)
+
+    @property
+    def webtoon_id(self):
+        return self._webtoon_id
 
     @property
     def episode_id(self):
