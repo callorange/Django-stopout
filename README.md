@@ -55,3 +55,27 @@ def get_episode_list(webtoon_id, page):
 
 4. get_episode_list 함수 구현
     - 지정된 웹툰 아이디와 페이지번호로 Webtoon 클래스 생성 후 크롤링 작업 진행 후 리스트 반환.
+
+
+
+***
+
+## 2. Django - 웹툰 사이트
+
+1. `app` 이름
+    - `webtoon`을 사용
+1. DB 모델
+    - `Webtoon` : 웹툰 정보
+    - `Episode` : 웹툰 에피소드 정보
+
+2. View
+    - 웹툰 목록 및 웹툰의 에피소드 목록 보여주기
+    - Url 예시
+        - / : 웹툰 목록
+        - /웹툰/ : 웹툰 에피소드 목록
+
+3. DB 모델에 크롤링 코드 추가
+    - 1번 과제에서 만든 크롤링 코드 활용
+    - `Webtoon` 모델에 `Episode`를 자동으로 넣는 로직 구현
+ 
+
