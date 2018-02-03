@@ -1,3 +1,4 @@
+import re
 import requests
 from bs4 import BeautifulSoup
 
@@ -56,6 +57,7 @@ class Webtoon:
     Raises:
         ValueError: 웹툰 아이디가 잘 못 지정된 경우 발생
     """
+    _webtoon_url = 'http://comic.naver.com/webtoon/list.nhn'
 
     _webtoon_id = 0
     _webtoon_thumbnail = None
@@ -63,9 +65,14 @@ class Webtoon:
     _webtoon_author = None
     _webtoon_description = None
 
-    _current_page = 1
+    _page_refreshed = False
+    _prev_page = 0
+    _current_page = 0
+    _next_page = 0
 
-    def __init__(self, webtoon_id=0):
+    _episode_list = []
+
+    def __init__(self, webtoon_id=0, page=0):
         """웹툰 정보 생성
 
         네이버에서 기본 정보를 가져와서 추가 한다.
@@ -77,6 +84,9 @@ class Webtoon:
             raise ValueError('웹툰아이디가 올바르지 않습니다.')
         self._webtoon_id = webtoon_id
 
+        if (isinstance(page, int) or page.isnumeric()) and webtoon_id > 0:
+            self._current_page = page
+
     def __str__(self):
         to_str = "웹툰 : {} - {} (작가:{})".format(
             self.webtoon_title,
@@ -86,8 +96,12 @@ class Webtoon:
         return to_str
 
     def info_refresh(self):
-        """웹툰 정보를 네이버 웹툰에서 가져온다"""
-        naver_page = get_url('http://comic.naver.com/webtoon/list.nhn', url_param={'titleId': self._webtoon_id})
+        """웹툰 정보를 네이버 웹툰에서 가져온다
+
+        Returns:
+            self: 현재 인스턴스
+        """
+        naver_page = get_url(self._webtoon_url, url_param={'titleId': self._webtoon_id})
 
         if naver_page:
             # BeautifulSoup 파싱
@@ -108,6 +122,86 @@ class Webtoon:
                     self._webtoon_author = comic_author.text.strip()
                 if comic_desc:
                     self._webtoon_description = comic_desc.text.strip()
+
+        return self
+
+    def page_refresh(self):
+        """현재 페이지의 에피소드 리스트를 갱신한다.
+
+        Returns:
+            self: 현재 인스턴스
+        """
+        if self._current_page < 1:
+            raise ValueError("조회할 페이지가 지정되지 않았습니다.")
+
+        # 에피소드 리스트 초기화
+        self._episode_list = []
+
+        # 네이버 페이지 조회
+        naver_page = get_url(self._webtoon_url, url_param={'titleId': self._webtoon_id, 'page': self._current_page})
+
+        if naver_page:
+            # BeautifulSoup 파싱
+            soup_page = BeautifulSoup(naver_page, 'lxml')
+
+            # 페이지 정보 뽑기
+            page_info = soup_page.select_one('div.paginate .page_wrap')
+            if page_info:
+                page_prev = page_info.select_one('a.pre')
+                page_current = page_info.select_one('strong.page')
+                page_next = page_info.select_one('a.next')
+
+                # 지정된 페이지가 실제로 존재하는지 확인. 네이버 웹툰은 페이지 번호가 없어도 마지막 페이지를 리턴한다.
+                if page_current and str(self._current_page) == page_current.em.text.strip():
+                    if page_prev:
+                        self._prev_page = self._current_page - 1
+                    if page_next:
+                        self._next_page = self._current_page + 1
+                    else:
+                        self._next_page = self._current_page
+                else:
+                    self._current_page = 0
+                    self._prev_page = 0
+                    self._next_page = 0
+                    self._page_refreshed = False
+                    self._episode_list = []
+
+            # 에피소드 리스트 만들기. 페이지번호 갱신이 정상으로 끝났을때
+            if self._current_page > 0:
+                episodes = soup_page.select('table.viewList tr')
+                for episode in episodes[1:]:
+                    item_list = episode.find_all('td')
+                    episode_thumbnail = item_list[0].find('img')['src']
+                    episode_id = item_list[0].find('a')['href']
+                    episode_id = re.search(r"no=(\d+)", episode_id).group(1)
+                    episode_title = item_list[1].text.strip()
+                    episode_rating = item_list[2].find('strong').text.strip()
+                    episode_created_date = item_list[3].text.strip()
+
+                    e = EpisodeData(episode_id, episode_thumbnail, episode_title, episode_rating, episode_created_date)
+                    self._episode_list.append(e)
+
+                self._page_refreshed = True
+
+        return self
+
+    def get_toons(self, page=0):
+        """현재 페이지의 웹툰 에피소드 목록을 반환한다.
+
+        Args:
+            page (int): 가져올 페이지
+
+        Returns:
+            list: EpisodeData 클래스 리스트
+        """
+        if not(isinstance(page, int)) or page > 0:
+            self.current_page = page
+
+        if self.page_refreshed:
+            return self._episode_list
+        else:
+            self.page_refresh()
+            return self._episode_list
 
     @property
     def webtoon_id(self):
@@ -169,6 +263,53 @@ class Webtoon:
         else:
             self.info_refresh()
             return self._webtoon_description
+
+    @property
+    def page_refreshed(self):
+        """현재 페이지 갱신여부 반환
+
+        Returns:
+            bool: 현재 페이지 갱신여부
+        """
+        return self._page_refreshed
+
+    @property
+    def prev_page(self):
+        """이전 페이지 번호 반환
+
+        Returns:
+            int: 이전 페이지 번호. 없을경우 0
+        """
+        return self._prev_page
+
+    @property
+    def next_page(self):
+        """다음 페이지 번호 반환
+
+        Returns:
+            int: 다음 페이지 번호. 현재페이지가 마지막이면 현제페이지와 같음
+        """
+        return self._next_page
+
+    @property
+    def current_page(self):
+        """현재 페이지 번호 반환
+
+        Returns:
+            int: 현재 페이지 번호. 지정되지 않았을 경우 0
+        """
+        return self._current_page
+
+    @current_page.setter
+    def current_page(self, page):
+        """현재 페이지 번호를 세팅한다.
+
+        Args:
+            page (int): 새로 지정할 현재 페이지
+        """
+        if not(isinstance(page, int)) or page > 0:
+            self._current_page = page
+            self._page_refreshed = False
 
 
 class EpisodeData:
@@ -234,17 +375,23 @@ def get_episode_list(webtoon_id, page=1):
     Raises:
         ValueError: webtoon_id, page가 잘 못 지정되었을 경우
     """
-    pass
+    toon = Webtoon(webtoon_id)
+    toon.current_page = page
+    return toon.get_toons()
 
 
 if __name__ == '__main__':
-    # toon = get_episode_list(1111)
-    # for episode in toon:
-    #     print(episode)
-    a = Webtoon(704595)
+    a = Webtoon(704595, 1)
+    # a = Webtoon(374974, 1)
     print(a.webtoon_id)
     print(a.webtoon_title)
     print(a.webtoon_author)
     print(a.webtoon_thumbnail)
     print(a.webtoon_description)
-    print(a)
+    a.page_refresh()
+    print(a.current_page)
+    print(a.prev_page)
+    print(a.next_page)
+
+    for episode in get_episode_list(374974):
+        print(episode)
