@@ -381,17 +381,17 @@ def get_episode_list(webtoon_id, page=1):
 
 
 if __name__ == '__main__':
-    a = Webtoon(704595, 1)
+    # a = Webtoon(704595, 1)
     # a = Webtoon(374974, 1)
-    print(a.webtoon_id)
-    print(a.webtoon_title)
-    print(a.webtoon_author)
-    print(a.webtoon_thumbnail)
-    print(a.webtoon_description)
-    a.page_refresh()
-    print(a.current_page)
-    print(a.prev_page)
-    print(a.next_page)
+    # print(a.webtoon_id)
+    # print(a.webtoon_title)
+    # print(a.webtoon_author)
+    # print(a.webtoon_thumbnail)
+    # print(a.webtoon_description)
+    # a.page_refresh()
+    # print(a.current_page)
+    # print(a.prev_page)
+    # print(a.next_page)
 
     for episode in get_episode_list(374974):
         print(episode)
