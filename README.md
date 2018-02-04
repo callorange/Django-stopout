@@ -64,6 +64,7 @@ def get_episode_list(webtoon_id, page):
 
 1. `app` 이름
     - `webtoon`을 사용
+    
 1. DB 모델
     - `Webtoon` : 웹툰 정보
     - `Episode` : 웹툰 에피소드 정보
@@ -78,4 +79,22 @@ def get_episode_list(webtoon_id, page):
     - 1번 과제에서 만든 크롤링 코드 활용
     - `Webtoon` 모델에 `Episode`를 자동으로 넣는 로직 구현
  
+### 2.1 구현
 
+1. `webtoon` app 추가
+1. DB 모델
+    - `Webtoon`
+        - 웹툰 정보 처리
+        - 웹툰 정보 및 에피소드 리스트 갱신
+            - `get_webtoon_info`: 웹툰 기본 정보 갱신
+            - `get_episode_list`: 에피소드 리스트 갱신( 지정된 페이지 )
+    - `Episode`
+        - 에피소드 정보 처리
+1. View
+    - `/`: 웹툰 목록
+    - `/<int:webtoon_id>/`: 해당 웹툰의 에피소드 목록(`Paginator` 사용하여 페이징 처리)
+
+1. 크롤링 코드 추가.
+    - `get_webtoon_info`, `get_episode_list` 함수에서 호출.
+    - 썸네일 이미지는 로컬에 저장 후 static url을 db에 저장
+        - 경로: `/static/webtoon_thumb/`
