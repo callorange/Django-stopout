@@ -27,7 +27,7 @@ def episode_list(request, webtoon_id):
     ep = Episode.objects.filter(webtoon=webtoon_id)
     if not toon.exists() or not ep.exists():
         return redirect('webtoon:index')
-
+    print(toon.get())
     context = {
         'webtoon': toon.get(),
         'ep': ep,
