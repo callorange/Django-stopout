@@ -99,25 +99,23 @@ def get_episode_list(webtoon_id, page):
     - 커스텀엑션에서 `get_webtoon_info`, `get_episode_list` 함수 호출
     - 썸네일 이미지는 로컬에 저장 후 static url을 db에 저장
         - 경로: `/static/webtoon_thumb/`
-        
-```python
-# admin.py
-
-class WebtoonPageForm(ActionForm):
-    page = forms.IntegerField(required=False)
-
-
-class WebtoonAdmin(admin.ModelAdmin):
-    actions = ['update_webtoon_info', 'update_webtoon_episode']
-    action_form = WebtoonPageForm
-    def update_webtoon_info(self, request, queryset):
-        # get_webtoon_info 호출
-    update_webtoon_info.short_description = '기본정보 갱신'
+            
+    ```python
+    class WebtoonPageForm(ActionForm):
+        page = forms.IntegerField(required=False)
     
-    def update_webtoon_episode(self, request, queryset):
-        # get_episode_list 호출
-    update_webtoon_episode.short_description = '에피소드 리스트 갱신'
-
-
-admin.site.register(Webtoon, WebtoonAdmin)
-```
+    
+    class WebtoonAdmin(admin.ModelAdmin):
+        actions = ['update_webtoon_info', 'update_webtoon_episode']
+        action_form = WebtoonPageForm
+        def update_webtoon_info(self, request, queryset):
+            get_webtoon_info 호출
+        update_webtoon_info.short_description = '기본정보 갱신'
+        
+        def update_webtoon_episode(self, request, queryset):
+            get_episode_list 호출
+        update_webtoon_episode.short_description = '에피소드 리스트 갱신'
+    
+    
+    admin.site.register(Webtoon, WebtoonAdmin)
+    ```
