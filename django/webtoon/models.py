@@ -47,8 +47,6 @@ class Webtoon(models.Model):
         return self.title
 
 
-
-
 class Episode(models.Model):
     webtoon = models.ForeignKey(Webtoon, on_delete=models.CASCADE)
     webtoon_no = models.IntegerField(default=0)

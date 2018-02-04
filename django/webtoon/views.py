@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from .models import Webtoon, Episode
 
 def index(request):
@@ -27,9 +28,18 @@ def episode_list(request, webtoon_id):
     ep = Episode.objects.filter(webtoon=webtoon_id)
     if not toon.exists() or not ep.exists():
         return redirect('webtoon:index')
-    print(toon.get())
+
+    pg = Paginator(ep, 10)
+    page = request.GET.get('page')
+    try:
+        ep_cur = pg.get_page(page)
+    except PageNotAnInteger:
+        ep_cur = pg.get_page(1)
+    except EmptyPage:
+        ep_cur = pg.get_page(pg.num_pages)
+
     context = {
         'webtoon': toon.get(),
-        'ep': ep,
+        'ep': ep_cur,
     }
     return render(request, 'webtoon/episode_list.html', context)

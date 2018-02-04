@@ -24,7 +24,7 @@ class WebtoonAdmin(admin.ModelAdmin):
             toon.get_episode_list(int(request.POST['page']))
         else:
             toon.get_episode_list(1)
-    update_webtoon_episode.short_description = '에피소드 리스트 갱신(기존정보는 삭제됩니다.)'
+    update_webtoon_episode.short_description = '에피소드 리스트 갱신'
 
 
 admin.site.register(Webtoon, WebtoonAdmin)
