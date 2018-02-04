@@ -7,6 +7,7 @@ from webtoon.models import Webtoon, Episode
 class WebtoonPageForm(ActionForm):
     page = forms.IntegerField(required=False)
 
+
 class WebtoonAdmin(admin.ModelAdmin):
 
     actions = ['update_webtoon_info', 'update_webtoon_episode']
@@ -19,8 +20,10 @@ class WebtoonAdmin(admin.ModelAdmin):
 
     def update_webtoon_episode(self, request, queryset):
         toon = queryset.get()
-        if request.POST['page']:
-        # toon.get_episode_list()
+        if request.POST['page'] != '':
+            toon.get_episode_list(int(request.POST['page']))
+        else:
+            toon.get_episode_list(1)
     update_webtoon_episode.short_description = '에피소드 리스트 갱신(기존정보는 삭제됩니다.)'
 
 

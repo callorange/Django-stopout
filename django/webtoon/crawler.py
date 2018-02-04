@@ -135,7 +135,7 @@ class Webtoon:
         """
         if path:
             url = self.webtoon_thumbnail
-            file_name = url.replace('http://thumb.comic.naver.net/webtoon/22897/thumbnail/', '')
+            file_name = url.replace('http://thumb.comic.naver.net/webtoon/' + str(self.webtoon_id) + '/thumbnail/', '')
             return get_file(url, path, file_name)
 
         return ('', '')
@@ -214,7 +214,7 @@ class Webtoon:
             # 에피소드 리스트 만들기. 페이지번호 갱신이 정상으로 끝났을때
             if self._current_page > 0:
                 episodes = soup_page.select('table.viewList tr')
-                for episode in episodes[1:]:
+                for episode in episodes[-10:]:
                     item_list = episode.find_all('td')
                     episode_thumbnail = item_list[0].find('img')['src']
                     episode_id = item_list[0].find('a')['href']
@@ -406,6 +406,22 @@ class EpisodeData:
             self._created_date,
         )
         return to_str
+
+    def thumbnail_save(self, path):
+        """썸네일을 로컬에 저장한다.
+
+        Args:
+            path (str): 저장할 폴더
+
+        Returns:
+            tuple: 경로명, 파일명. 실패시 빈 튜플
+        """
+        if path:
+            url = self.url_thumbnail
+            file_name = url.replace('http://thumb.comic.naver.net/webtoon/' + str(self.webtoon_id) + '/' + str(self.episode_id) + '/', '')
+            return get_file(url, path, file_name)
+
+        return ('', '')
 
     @property
     def episode_url(self):

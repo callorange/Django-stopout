@@ -28,10 +28,25 @@ class Webtoon(models.Model):
             self.save()
 
     def get_episode_list(self, page=1):
-        nt = NaverToon(self.webtoon_no, apge)
+        nt = NaverToon(self.webtoon_no, page)
+        for episode in nt.get_toons()[::-1]:
+            thumbnail_dir = os.path.join(os.path.join(BASE_DIR, "static"), 'webtoon_thumb')
+            thumbnail_dir = 'webtoon_thumb/' + episode.thumbnail_save(thumbnail_dir)[1]
+            ep, created = Episode.objects.get_or_create(
+                webtoon=self,
+                webtoon_no=episode.webtoon_id,
+                episode_no=episode.episode_id,
+                title=episode.title,
+                thumbnail=thumbnail_dir,
+                rating=episode.rating,
+                created_date=parse_date(episode.created_date.replace('.', '-')),
+                url=episode.episode_url
+            )
 
     def __str__(self):
         return self.title
+
+
 
 
 class Episode(models.Model):
@@ -41,8 +56,11 @@ class Episode(models.Model):
     title = models.CharField(max_length=200, default='')
     thumbnail = models.CharField(max_length=300) # static 경로로 넣을것.
     rating = models.CharField(max_length=4)
-    created_date = models.DateField('published date')
+    created_date = models.DateField('date published', null=True)
     url = models.CharField(max_length=100)
 
     def __str__(self):
         return "{} - {}".format(self.webtoon, self.title)
+
+    class Meta:
+        ordering = ['-created_date']
