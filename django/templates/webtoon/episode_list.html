@@ -7,11 +7,11 @@
 
 {% block 'doc-subject' %}
     <div class="media">
-        <img class="align-self-center mr-3 img-thumbnail" src="{% static 'webtoon_thumb/title_thumbnail_20140829190825_t125x101.jpg' %}" alt="Card image cap" data-adaptive-background>
+        <img class="align-self-center mr-3 img-thumbnail" src="{% static webtoon.thumbnail %}" alt="Card image cap" data-adaptive-background>
         <div class="media-body">
-            <h1 class="mt-0">심심한 마왕</h1>
-            <h6 class="mb-2 text-muted">이현민</h6>
-            평화로운(?) 마계에서 평화롭게(?) 살아가는 심심한 마왕의 심심하지만은 않은 이야기
+            <h1 class="mt-0">{{ webtoon.title }}</h1>
+            <h6 class="mb-2 text-muted">{{ webtoon.author }}</h6>
+            {{ webtoon.description }}
         </div>
     </div>
 {% endblock %}
@@ -28,12 +28,12 @@
             </tr>
         </thead>
         <tbody>
-        {% for i in '1234567890' %}
+        {% for e in ep %}
             <tr>
-                <td class="text-center"><img class="img-thumbnail" src="http://thumb.comic.naver.net/webtoon/374974/thumbnail/title_thumbnail_20140829190825_t125x101.jpg" alt="Card image cap"></td>
-                <td class="align-middle">평화로운(?) 마계에서 평화롭게(?) <a href=""><i class="fas fa-external-link-alt"></i><span class="sr-only">보러가기</span></a></td>
-                <td class="text-center align-middle">9.99</td>
-                <td class="text-center align-middle">2017.09.11</td>
+                <td class="text-center"><img class="img-thumbnail" src="{% static e.thumbnail %}" alt="Card image cap"></td>
+                <td class="align-middle">{{ e.title }} <a href="{{ e.url }}" target="_blank"><i class="fas fa-external-link-alt"></i><span class="sr-only">보러가기</span></a></td>
+                <td class="text-center align-middle">{{ e.rating }}</td>
+                <td class="text-center align-middle">{{ e.created_date }}</td>
             </tr>
         {% endfor %}
         </tbody>

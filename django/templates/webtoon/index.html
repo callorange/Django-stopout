@@ -6,23 +6,34 @@
 {% endblock %}
 
 {% block 'doc-subject' %}
-<h1 class="display-5">웹툰 리스트</h1>
+    <h1 class="display-5">웹툰 리스트</h1>
+    {% if search_webtoon %}
+    <div class="p-3">
+        <p class="lead">'{{ search_webtoon }}' 검색 결과</p>
+    </div>
+    {% endif %}
 {% endblock %}
 
 {% block 'doc-body' %}
 <div class="row px-3">
-    {% for i in '123456789' %}
-    <div class="col-sm-6 col-md-4 col-lg-3 py-2">
-        <div class="card">
-            <img class="card-img-top" src="{% static 'webtoon_thumb/title_thumbnail_20140829190825_t125x101.jpg' %}" alt="Card image cap">
-            <div class="card-body">
-                <h5 class="card-title">심심한 마왕</h5>
-                <h6 class="card-subtitle mb-2 text-muted">이현민</h6>
-                <p class="card-text">평화로운(?) 마계에서 평화롭게(?) 살아가는 심심한 마왕의 심심하지만은 않은 이야기</p>
-                <a href="{% url 'webtoon:episode_list' webtoon_id=i %}" class="card-link">에피소드 보기</a>
+    {% if toons %}
+        {% for toon in toons %}
+        <div class="col-sm-6 col-md-4 col-lg-3 py-2">
+            <div class="card">
+                <img class="card-img-top" src="{% static toon.thumbnail %}" alt="Card image cap">
+                <div class="card-body">
+                    <h5 class="card-title">{{ toon.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ toon.author }}</h6>
+                    <p class="card-text">{{ toon.description }}</p>
+                    <a href="{% url 'webtoon:episode_list' webtoon_id=toon.pk %}" class="card-link">에피소드 보기</a>
+                </div>
             </div>
         </div>
-    </div>
-    {% endfor %}
+        {% endfor %}
+    {% else %}
+        <div class="p-3">
+            <p class="lead">웹툰 정보가 없습니다.</p>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
