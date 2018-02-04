@@ -1,4 +1,6 @@
 import re
+
+import os
 import requests
 from bs4 import BeautifulSoup
 
@@ -48,6 +50,33 @@ def get_url(url, method='get', url_param=''):
     return response.text
 
 
+def get_file(url, save_path, save_name):
+    """웹상에 있는 파일을 지정된 경로로 저장한다.
+
+    Args:
+        url (str): 저장할 url
+        save_path (str): 저장경로
+        save_name (str): 파일명
+
+    Returns:
+        Tuple: 경로,파일명
+
+    """
+    # 일부 웹사이트는 http에서 헤더를 검사해서 응답을 안주는 경우가 있다. (ex: melon.com)
+    my_headers = {'user-agent': 'my-app/0.0.1'}
+    response = requests.get(url, headers=my_headers)
+    if response.status_code != 200:
+        return ('', '')
+
+    save_path_name = os.path.join(save_path, save_name)
+
+    if not os.path.exists(save_path_name):
+        with open(save_path_name, 'wb') as fd:
+            for chunk in response.iter_content(chunk_size=128):
+                fd.write(chunk)
+    return save_path, save_name
+
+
 class Webtoon:
     """웹툰 정보
 
@@ -94,6 +123,22 @@ class Webtoon:
             self.webtoon_author
         )
         return to_str
+
+    def thumbnail_save(self, path):
+        """썸네일을 로컬에 저장한다.
+
+        Args:
+            path (str): 저장할 폴더
+
+        Returns:
+            tuple: 경로명, 파일명. 실패시 빈 튜플
+        """
+        if path:
+            url = self.webtoon_thumbnail
+            file_name = url.replace('http://thumb.comic.naver.net/webtoon/' + str(self.webtoon_id) + '/thumbnail/', '')
+            return get_file(url, path, file_name)
+
+        return ('', '')
 
     def info_refresh(self):
         """웹툰 정보를 네이버 웹툰에서 가져온다
@@ -169,7 +214,7 @@ class Webtoon:
             # 에피소드 리스트 만들기. 페이지번호 갱신이 정상으로 끝났을때
             if self._current_page > 0:
                 episodes = soup_page.select('table.viewList tr')
-                for episode in episodes[1:]:
+                for episode in episodes[-10:]:
                     item_list = episode.find_all('td')
                     episode_thumbnail = item_list[0].find('img')['src']
                     episode_id = item_list[0].find('a')['href']
@@ -361,6 +406,22 @@ class EpisodeData:
             self._created_date,
         )
         return to_str
+
+    def thumbnail_save(self, path):
+        """썸네일을 로컬에 저장한다.
+
+        Args:
+            path (str): 저장할 폴더
+
+        Returns:
+            tuple: 경로명, 파일명. 실패시 빈 튜플
+        """
+        if path:
+            url = self.url_thumbnail
+            file_name = url.replace('http://thumb.comic.naver.net/webtoon/' + str(self.webtoon_id) + '/' + str(self.episode_id) + '/', '')
+            return get_file(url, path, file_name)
+
+        return ('', '')
 
     @property
     def episode_url(self):
