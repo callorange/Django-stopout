@@ -38,13 +38,17 @@ class Webtoon(models.Model):
                 episode_no=episode.episode_id,
             )
 
-            if not created:
+            if ep.title != episode.title:
                 ep.title = episode.title
+            if ep.thumbnail != thumbnail_dir:
                 ep.thumbnail = thumbnail_dir
+            if ep.rating != episode.rating:
                 ep.rating = episode.rating
+            if ep.created_date != parse_date(episode.created_date.replace('.', '-')):
                 ep.created_date = parse_date(episode.created_date.replace('.', '-'))
+            if ep.url != episode.episode_url:
                 ep.url = episode.episode_url
-                ep.save()
+            ep.save()
 
     def __str__(self):
         return self.title
