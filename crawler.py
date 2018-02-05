@@ -190,14 +190,16 @@ class Webtoon:
             soup_page = BeautifulSoup(naver_page, 'lxml')
 
             # 페이지 정보 뽑기
+            print(self._current_page)
             page_info = soup_page.select_one('div.paginate .page_wrap')
             if page_info:
                 page_prev = page_info.select_one('a.pre')
                 page_current = page_info.select_one('strong.page')
                 page_next = page_info.select_one('a.next')
 
-                # 지정된 페이지가 실제로 존재하는지 확인. 네이버 웹툰은 페이지 번호가 없어도 마지막 페이지를 리턴한다.
-                if page_current and str(self._current_page) == page_current.em.text.strip():
+                # 지정된 페이지가 실제로 존재하는지 확인. 네이버 웹툰은 페이지 번호가 커도 마지막 페이지를 리턴한다.
+                if page_current:
+                    self._current_page = int(page_current.em.text.strip())
                     if page_prev:
                         self._prev_page = self._current_page - 1
                     if page_next:
@@ -210,23 +212,24 @@ class Webtoon:
                     self._next_page = 0
                     self._page_refreshed = False
                     self._episode_list = []
-
+            print(self._current_page)
             # 에피소드 리스트 만들기. 페이지번호 갱신이 정상으로 끝났을때
             if self._current_page > 0:
                 episodes = soup_page.select('table.viewList tr')
-                for episode in episodes[-10:]:
+                self._episode_list = []
+                for episode in episodes:
                     item_list = episode.find_all('td')
-                    episode_thumbnail = item_list[0].find('img')['src']
-                    episode_id = item_list[0].find('a')['href']
-                    episode_id = re.search(r"no=(\d+)", episode_id).group(1)
-                    episode_title = item_list[1].text.strip()
-                    episode_rating = item_list[2].find('strong').text.strip()
-                    episode_created_date = item_list[3].text.strip()
+                    if item_list and episode.get('class') is None:
+                        episode_thumbnail = item_list[0].find('img')['src']
+                        episode_id = item_list[0].find('a')['href']
+                        episode_id = re.search(r"no=(\d+)", episode_id).group(1)
+                        episode_title = item_list[1].text.strip()
+                        episode_rating = item_list[2].find('strong').text.strip()
+                        episode_created_date = item_list[3].text.strip()
 
-                    e = EpisodeData(self._webtoon_id, episode_id, episode_thumbnail, episode_title, episode_rating, episode_created_date)
-                    self._episode_list.append(e)
-
-                self._page_refreshed = True
+                        e = EpisodeData(self._webtoon_id, episode_id, episode_thumbnail, episode_title, episode_rating, episode_created_date)
+                        self._episode_list.append(e)
+                        self._page_refreshed = True
 
         return self
 
