@@ -36,12 +36,15 @@ class Webtoon(models.Model):
                 webtoon=self,
                 webtoon_no=episode.webtoon_id,
                 episode_no=episode.episode_id,
-                title=episode.title,
-                thumbnail=thumbnail_dir,
-                rating=episode.rating,
-                created_date=parse_date(episode.created_date.replace('.', '-')),
-                url=episode.episode_url
             )
+
+            if not created:
+                ep.title = episode.title
+                ep.thumbnail = thumbnail_dir
+                ep.rating = episode.rating
+                ep.created_date = parse_date(episode.created_date.replace('.', '-'))
+                ep.url = episode.episode_url
+                ep.save()
 
     def __str__(self):
         return self.title
@@ -61,4 +64,4 @@ class Episode(models.Model):
         return "{} - {}".format(self.webtoon, self.title)
 
     class Meta:
-        ordering = ['-created_date']
+        ordering = ['-webtoon_no', '-created_date']
